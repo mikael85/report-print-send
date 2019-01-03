@@ -5,6 +5,8 @@
 import time
 import datetime
 import logging
+import base64
+from PIL import Image, ImageOps
 from openerp import api, exceptions, fields, models
 from openerp.tools.translate import _
 from openerp.tools.safe_eval import safe_eval
@@ -113,6 +115,29 @@ class PrintingLabelZpl2(models.Model):
                         zpl2.ARG_COLOR: component.color,
                         zpl2.ARG_ROUNDING: component.rounding,
                     })
+            elif component.component_type == 'graphic':
+                image = component.graphic_image or data
+                pil_image = Image.open(io.BytesIO(
+                    base64.b64decode(image))).convert('RGB')
+                if component.width and component.height:
+                    pil_image = pil_image.resize(
+                        (component.width, component.height))
+
+                # Invert the colors
+                if component.reverse_print:
+                    pil_image = ImageOps.invert(pil_image)
+
+                # Rotation (PIL rotates counter clockwise)
+                if component.orientation == zpl2.ORIENTATION_ROTATED:
+                    pil_image = pil_image.transpose(Image.ROTATE_270)
+                elif component.orientation == zpl2.ORIENTATION_INVERTED:
+                    pil_image = pil_image.transpose(Image.ROTATE_180)
+                elif component.orientation == zpl2.ORIENTATION_BOTTOM_UP:
+                    pil_image = pil_image.transpose(Image.ROTATE_90)
+
+                label_data.graphic_field(
+                    component_offset_x, component_offset_y,
+                    pil_image)
             elif component.component_type == 'circle':
                 label_data.graphic_circle(
                     component_offset_x, component_offset_y, {
