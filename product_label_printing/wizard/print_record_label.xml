@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2016 SYLEAM
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="view_wizard_print_product_label_form" model="ir.ui.view">
+        <field name="name">wizard.print.zpl2.product.label.form</field>
+        <field name="model">wizard.print.zpl2.product.label</field>
+        <field name="arch" type="xml">
+            <form string="Imprimir Etiquetas">
+                <group>
+                    <field name="printer_id"/>
+                    <field name="label_id"/>
+                </group>
+                <field name="line_ids" widget="one2many">
+                    <tree editable="bottom">
+                        <field name="product_id"/>
+                        <field name="qty"/>
+                    </tree>
+                </field>
+                <button string="Imprimir Etiquetas" type="object" name="print_label"/>
+            </form>
+        </field>
+    </record>
+
+    <act_window id="launch_templates_wizard" name="Imprimir ZPLs" src_model="product.template" res_model="wizard.print.zpl2.product.label" view_mode="form" target="new" key2="client_print_multi"/>
+
+    <act_window id="launch_products_wizard" name="Imprimir ZPLs" src_model="product.product" res_model="wizard.print.zpl2.product.label" view_mode="form" target="new" key2="client_print_multi"/>
+
+</odoo>
